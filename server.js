@@ -46,9 +46,16 @@ const Product = mongoose.model('Product', new mongoose.Schema({
     image: { type: String, required: true }
 }));
 
+// 📌 Корневой маршрут (проверка, что сервер работает)
+app.get('/', (req, res) => {
+    console.log("✅ Корневой маршрут вызван!");
+    res.send("✅ Сервер работает!");
+});
+
 // 📌 Маршрут: Добавить товар (поддержка JSON и form-data)
 app.post('/api/products', upload.single('image'), async (req, res) => {
     try {
+        console.log("📢 POST /api/products вызван!", req.body);
         const { name, price, image } = req.body;
         const uploadedImage = req.file ? req.file.path : image;
 
@@ -59,6 +66,7 @@ app.post('/api/products', upload.single('image'), async (req, res) => {
         const newProduct = new Product({ name, price, image: uploadedImage });
         await newProduct.save();
 
+        console.log("✅ Новый товар добавлен:", newProduct);
         res.status(201).json({ message: "Товар добавлен!", product: newProduct });
     } catch (error) {
         console.error("❌ Ошибка сервера:", error);
@@ -69,7 +77,9 @@ app.post('/api/products', upload.single('image'), async (req, res) => {
 // 📌 Маршрут: Получить все товары
 app.get('/api/products', async (req, res) => {
     try {
+        console.log("📢 GET /api/products вызван!");
         const products = await Product.find();
+        console.log("📦 Найденные товары:", products);
         res.json(products);
     } catch (error) {
         console.error("❌ Ошибка при получении товаров:", error);
@@ -77,6 +87,6 @@ app.get('/api/products', async (req, res) => {
     }
 });
 
-// ✅ Запуск сервера (исправлено!)
+// ✅ Запуск сервера (убрали '0.0.0.0' для Render)
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Сервер запущен на порту ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Сервер запущен на порту ${PORT}`));
